@@ -7,13 +7,25 @@ import Hearts from "./Hearts";
 type BattleCounterProps = {
   activeLife: number;
   isComputer?: boolean;
+  computerHand?: string;
 };
 
 const BattleCounter = ({
   activeLife,
   isComputer = false,
+  computerHand,
 }: BattleCounterProps) => {
   const [hand, setHand] = useState<string>("");
+  const setBattleChoiceImg = () => {
+    if (hand === "가위" || computerHand === "가위") {
+      return HandScissors;
+    } else if (hand === "바위" || computerHand === "바위") {
+      return HandRock;
+    } else if (hand === "보" || computerHand === "보") {
+      return HandPaper;
+    }
+    return Question;
+  };
   return (
     <Styled.Container>
       {/*
@@ -26,15 +38,7 @@ const BattleCounter = ({
        * 컴퓨터는 카운트다운이 끝나면 컴퓨터가 고른 랜덤한 선택지가 컴퓨터 파트에 보여져야 합니다.
        */}
       <Styled.BattelChoiceImg
-        src={
-          isComputer || !hand
-            ? Question
-            : hand === "가위"
-            ? HandScissors
-            : hand === "바위"
-            ? HandRock
-            : HandPaper
-        }
+        src={setBattleChoiceImg()}
         alt={hand ? `${hand}를 편 손` : "물음표"}
       />
 

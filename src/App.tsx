@@ -1,7 +1,46 @@
 import * as Styled from "./App.style";
+import { useState, useEffect, useRef } from "react";
 import { BattleCounter, BattleResultInfo } from "./components";
 
+// function useInterval(callback, delay) {
+//   const savedCallback = useRef();
+
+//   // Remember the latest function.
+//   useEffect(() => {
+//     savedCallback.current = callback;
+//   }, [callback]);
+
+//   // Set up the interval.
+//   useEffect(() => {
+//     function tick() {
+//       savedCallback.current();
+//     }
+//     if (delay !== null) {
+//       let id = setInterval(tick, delay);
+//       return () => clearInterval(id);
+//     }
+//   }, [delay]);
+// }
 function App() {
+  const [computerHand, setComputerHand] = useState<string>("");
+  const [countNum, setCountNum] = useState<string>("Ready");
+
+  useEffect(() => {
+    const countDown = setInterval(() => {
+      if (Number(countNum) > 0) {
+        setCountNum((count) => String(Number(count) - 1));
+      }
+      if (Number(countNum) <= 0) {
+        clearInterval(countDown);
+        setComputerHand(
+          ["가위", "바위", "보"][
+            Math.floor(Math.random() * ["가위", "바위", "보"].length)
+          ]
+        );
+      }
+    }, 1000);
+    return () => clearInterval(countDown);
+  }, [countNum]);
   return (
     <Styled.Container>
       {/*
@@ -33,8 +72,8 @@ function App() {
          * 3초가 지나면 이번 라운드의 승패가 나옵니다. Win / Lose / Draw
          * 사용자가 재경기 버튼을 클릭하면 'READY'로 변경되어야 합니다.
          */}
-        <Styled.CountDownNumber>READY</Styled.CountDownNumber>
-        <BattleCounter activeLife={1} isComputer />
+        <Styled.CountDownNumber>{countNum}</Styled.CountDownNumber>
+        <BattleCounter activeLife={1} isComputer computerHand={computerHand} />
       </Styled.BattleGround>
 
       {/*
@@ -55,7 +94,9 @@ function App() {
        * '다시 시작하기' 버튼을 클릭할 경우,
        * 최초의 상태로 리셋이 되어야 합니다.
        */}
-      <Styled.GameControlButton>대결!</Styled.GameControlButton>
+      <Styled.GameControlButton onClick={() => setCountNum("3")}>
+        대결!
+      </Styled.GameControlButton>
 
       {/*
        * TODO: 라운드 종료 - 결과
