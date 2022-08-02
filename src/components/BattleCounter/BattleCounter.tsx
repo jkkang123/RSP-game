@@ -1,4 +1,5 @@
-import { HandPaper, Question } from "@images/index";
+import { HandPaper, HandRock, HandScissors, Question } from "@images/index";
+import { useState } from "react";
 import BattleChoice from "./BattleChoice";
 import * as Styled from "./BattleCounter.style";
 import Hearts from "./Hearts";
@@ -8,7 +9,11 @@ type BattleCounterProps = {
   isComputer?: boolean;
 };
 
-const BattleCounter = ({ activeLife, isComputer = false }: BattleCounterProps) => {
+const BattleCounter = ({
+  activeLife,
+  isComputer = false,
+}: BattleCounterProps) => {
+  const [hand, setHand] = useState<string>("");
   return (
     <Styled.Container>
       {/*
@@ -20,9 +25,22 @@ const BattleCounter = ({ activeLife, isComputer = false }: BattleCounterProps) =
        *
        * 컴퓨터는 카운트다운이 끝나면 컴퓨터가 고른 랜덤한 선택지가 컴퓨터 파트에 보여져야 합니다.
        */}
-      <Styled.BattelChoiceImg src={isComputer ? Question : HandPaper} alt="보자기를 편 손" />
+      <Styled.BattelChoiceImg
+        src={
+          isComputer || !hand
+            ? Question
+            : hand === "가위"
+            ? HandScissors
+            : hand === "바위"
+            ? HandRock
+            : HandPaper
+        }
+        alt={hand ? `${hand}를 편 손` : "물음표"}
+      />
 
-      <Styled.ConputerName>{isComputer ? "Computer" : "YOU"}</Styled.ConputerName>
+      <Styled.ConputerName>
+        {isComputer ? "Computer" : "YOU"}
+      </Styled.ConputerName>
 
       <Hearts activeLife={activeLife} />
 
@@ -33,7 +51,7 @@ const BattleCounter = ({ activeLife, isComputer = false }: BattleCounterProps) =
        * 가위 / 바위 / 보 중 하나가 결과로 보여져야 합니다.
        * 재대결 버튼을 클릭하게 되면 다시 `생각중...` 으로 보여져야 합니다.
        */}
-      {isComputer ? "생각중..." : <BattleChoice />}
+      {isComputer ? "생각중..." : <BattleChoice onChangeButton={setHand} />}
     </Styled.Container>
   );
 };
