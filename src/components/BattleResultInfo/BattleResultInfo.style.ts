@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import Colors from "~/constants/Colors";
 
-export const Container = styled.p`
+export const Container = styled.p<{ status: string | undefined }>`
   display: flex;
   justify-content: center;
   align-items: center;
@@ -11,7 +11,12 @@ export const Container = styled.p`
 
   border-radius: 6px;
 
-  background-color: ${Colors.green96};
+  background-color: ${(props) =>
+    props.status === "win"
+      ? Colors.green96
+      : props.status === "lose"
+      ? Colors.redff
+      : Colors.greyf7};
 
   & + & {
     margin-top: 20px;

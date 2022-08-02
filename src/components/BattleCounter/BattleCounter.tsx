@@ -1,5 +1,5 @@
 import { HandPaper, HandRock, HandScissors, Question } from "@images/index";
-import { useState } from "react";
+import { useState, Dispatch, SetStateAction } from "react";
 import BattleChoice from "./BattleChoice";
 import * as Styled from "./BattleCounter.style";
 import Hearts from "./Hearts";
@@ -7,21 +7,22 @@ import Hearts from "./Hearts";
 type BattleCounterProps = {
   activeLife: number;
   isComputer?: boolean;
-  computerHand?: string;
+  hand: string;
+  changHand: Dispatch<SetStateAction<string>>;
 };
 
 const BattleCounter = ({
   activeLife,
   isComputer = false,
-  computerHand,
+  hand,
+  changHand,
 }: BattleCounterProps) => {
-  const [hand, setHand] = useState<string>("");
   const setBattleChoiceImg = () => {
-    if (hand === "가위" || computerHand === "가위") {
+    if (hand === "가위") {
       return HandScissors;
-    } else if (hand === "바위" || computerHand === "바위") {
+    } else if (hand === "바위") {
       return HandRock;
-    } else if (hand === "보" || computerHand === "보") {
+    } else if (hand === "보") {
       return HandPaper;
     }
     return Question;
@@ -55,7 +56,7 @@ const BattleCounter = ({
        * 가위 / 바위 / 보 중 하나가 결과로 보여져야 합니다.
        * 재대결 버튼을 클릭하게 되면 다시 `생각중...` 으로 보여져야 합니다.
        */}
-      {isComputer ? "생각중..." : <BattleChoice onChangeButton={setHand} />}
+      {isComputer ? "생각중..." : <BattleChoice onChangeButton={changHand} />}
     </Styled.Container>
   );
 };

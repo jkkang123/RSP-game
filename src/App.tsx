@@ -1,29 +1,54 @@
 import * as Styled from "./App.style";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { BattleCounter, BattleResultInfo } from "./components";
 
-// function useInterval(callback, delay) {
-//   const savedCallback = useRef();
+export interface ResultObjType {
+  you: string;
+  computer: string;
+  result: string | undefined;
+}
 
-//   // Remember the latest function.
-//   useEffect(() => {
-//     savedCallback.current = callback;
-//   }, [callback]);
-
-//   // Set up the interval.
-//   useEffect(() => {
-//     function tick() {
-//       savedCallback.current();
-//     }
-//     if (delay !== null) {
-//       let id = setInterval(tick, delay);
-//       return () => clearInterval(id);
-//     }
-//   }, [delay]);
-// }
 function App() {
+  const [hand, setHand] = useState<string>("");
   const [computerHand, setComputerHand] = useState<string>("");
   const [countNum, setCountNum] = useState<string>("Ready");
+  const [isClickedBtn, setIsClickedBtn] = useState<boolean>(false);
+  const [battleResults, setBattleResults] = useState<ResultObjType[]>([]);
+
+  const compareHand = useCallback((myHand: string, comHand: string) => {
+    if (myHand === "가위") {
+      if (comHand === "가위") {
+        return "draw";
+      } else if (comHand === "바위") {
+        return "lose";
+      } else {
+        return "win";
+      }
+    } else if (myHand === "바위") {
+      if (comHand === "가위") {
+        return "win";
+      } else if (comHand === "바위") {
+        return "draw";
+      } else {
+        return "lose";
+      }
+    } else if (myHand === "보") {
+      if (comHand === "가위") {
+        return "lose";
+      } else if (comHand === "바위") {
+        return "win";
+      } else {
+        return "draw";
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const gameResult = localStorage.getItem("gameResult");
+    if (gameResult) {
+      setBattleResults(JSON.parse(gameResult));
+    }
+  }, []);
 
   useEffect(() => {
     const countDown = setInterval(() => {
@@ -31,16 +56,40 @@ function App() {
         setCountNum((count) => String(Number(count) - 1));
       }
       if (Number(countNum) <= 0) {
+        const randomHand = ["가위", "바위", "보"][
+          Math.floor(Math.random() * ["가위", "바위", "보"].length)
+        ];
         clearInterval(countDown);
-        setComputerHand(
-          ["가위", "바위", "보"][
-            Math.floor(Math.random() * ["가위", "바위", "보"].length)
-          ]
-        );
+        setComputerHand(randomHand);
+        setIsClickedBtn(true);
       }
     }, 1000);
-    return () => clearInterval(countDown);
+    return () => {
+      clearInterval(countDown);
+    };
   }, [countNum]);
+
+  useEffect(() => {
+    if (computerHand && hand && isClickedBtn) {
+      const tempResult = localStorage.getItem("gameResult");
+      const resultObj: ResultObjType = {
+        you: hand,
+        computer: computerHand,
+        result: compareHand(hand, computerHand),
+      };
+      if (tempResult && typeof tempResult === "string") {
+        const gameResultArr = JSON.parse(tempResult);
+        gameResultArr.push(resultObj);
+        localStorage.setItem("gameResult", JSON.stringify(gameResultArr));
+        setBattleResults(gameResultArr);
+      } else {
+        localStorage.setItem("gameResult", JSON.stringify([resultObj]));
+        setBattleResults([resultObj]);
+      }
+    }
+    return () => setIsClickedBtn(false);
+  }, [compareHand, computerHand, hand, isClickedBtn]);
+
   return (
     <Styled.Container>
       {/*
@@ -63,7 +112,7 @@ function App() {
          * 경기가 종료되면 window.alert 메소드를 활용하여
          * "<컴퓨터가 / 당신이> 승리하였습니다." 를 띄워야합니다.
          */}
-        <BattleCounter activeLife={2} />
+        <BattleCounter activeLife={2} hand={hand} changHand={setHand} />
         {/*
          * TODO: 라운드 종료 / 경기 종료 - 게임 시작 버튼
          *
@@ -73,7 +122,12 @@ function App() {
          * 사용자가 재경기 버튼을 클릭하면 'READY'로 변경되어야 합니다.
          */}
         <Styled.CountDownNumber>{countNum}</Styled.CountDownNumber>
-        <BattleCounter activeLife={1} isComputer computerHand={computerHand} />
+        <BattleCounter
+          activeLife={1}
+          isComputer
+          hand={computerHand}
+          changHand={setComputerHand}
+        />
       </Styled.BattleGround>
 
       {/*
@@ -108,9 +162,9 @@ function App() {
        * 패배 #ffc8c1
        * 무승부 #f7f7f7
        */}
-      <BattleResultInfo />
-      <BattleResultInfo />
-      <BattleResultInfo />
+      {battleResults.map((result: ResultObjType, index: number) => {
+        return <BattleResultInfo key={index + 1} data={result} />;
+      })}
     </Styled.Container>
   );
 }
