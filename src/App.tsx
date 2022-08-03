@@ -60,8 +60,17 @@ function App() {
     }
   }, []);
 
+  const alertGameResult = (my: number, computer: number) => {
+    if (my && !computer) {
+      window.alert("당신이 승리하였습니다.");
+    } else if (!my && computer) {
+      window.alert("컴퓨터가 승리하였습니다.");
+    }
+  };
+
   const changeCtrlButton = useCallback((obj: ResultObjType) => {
     if (!obj.life.my || !obj.life.computer) {
+      alertGameResult(obj.life.my, obj.life.computer);
       return "다시 시작하기";
     } else if (obj.life.my && obj.life.computer) {
       return "재대결하기";
