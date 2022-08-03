@@ -26,7 +26,7 @@ export const CountDownNumber = styled.strong`
   font-size: 32px;
 `;
 
-export const GameControlButton = styled.button`
+export const GameControlButton = styled.button<{ status: string }>`
   width: 300px;
   height: 50px;
 
@@ -34,7 +34,8 @@ export const GameControlButton = styled.button`
 
   border-radius: 6px;
 
-  background-color: ${Colors.blue50};
+  background-color: ${(props) =>
+    props.status !== "다시 시작하기" ? Colors.blue50 : Colors.red};
 
   font-size: 18px;
   color: white;

@@ -30,6 +30,7 @@ function App() {
       },
     },
   ]);
+  const [ctrlButtonStr, setCtrlButtonStr] = useState<string>("대결!");
 
   const compareHand = useCallback((myHand: string, comHand: string) => {
     if (myHand === "가위") {
@@ -59,6 +60,16 @@ function App() {
     }
   }, []);
 
+  const changeCtrlButton = useCallback((obj: ResultObjType) => {
+    if (!obj.life.my || !obj.life.computer) {
+      return "다시 시작하기";
+    } else if (obj.life.my && obj.life.computer) {
+      return "재대결하기";
+    } else {
+      return "대결!";
+    }
+  }, []);
+
   const isChoiceBtnSelected = () => {
     if (hand) {
       setCountNum("3");
@@ -73,8 +84,11 @@ function App() {
       const storageResult: ResultObjType[] = JSON.parse(tempResult);
       setBattleResults(storageResult);
       setRound(storageResult.length);
+      setCtrlButtonStr(
+        changeCtrlButton(storageResult[storageResult.length - 1])
+      );
     }
-  }, []);
+  }, [changeCtrlButton]);
 
   useEffect(() => {
     const countDown = setInterval(() => {
@@ -98,19 +112,22 @@ function App() {
   useEffect(() => {
     if (computerHand && hand && isClickedBtn) {
       const storageResult = localStorage.getItem("gameResult");
+      const lastResult: ResultObjType = battleResults[battleResults.length - 1];
       const resultString: string | undefined = compareHand(hand, computerHand);
-      const beforeLife = battleResults[battleResults.length - 1].life;
       const resultObj: ResultObjType = {
-        ...battleResults[battleResults.length - 1],
+        ...lastResult,
         you: hand,
         computer: computerHand,
         result: resultString,
         life: {
-          my: resultString === "lose" ? beforeLife.my - 1 : beforeLife.my,
+          my:
+            resultString === "lose"
+              ? lastResult.life.my - 1
+              : lastResult.life.my,
           computer:
             resultString === "win"
-              ? beforeLife.computer - 1
-              : beforeLife.computer,
+              ? lastResult.life.computer - 1
+              : lastResult.life.computer,
         },
       };
       if (storageResult && typeof storageResult === "string") {
@@ -122,10 +139,18 @@ function App() {
         localStorage.setItem("gameResult", JSON.stringify([resultObj]));
         setBattleResults([resultObj]);
       }
+      setCtrlButtonStr(changeCtrlButton(resultObj));
       setRound((num) => num + 1);
     }
     return () => setIsClickedBtn(false);
-  }, [compareHand, battleResults, computerHand, hand, isClickedBtn]);
+  }, [
+    compareHand,
+    changeCtrlButton,
+    battleResults,
+    computerHand,
+    hand,
+    isClickedBtn,
+  ]);
 
   return (
     <Styled.Container>
@@ -189,8 +214,11 @@ function App() {
        * '다시 시작하기' 버튼을 클릭할 경우,
        * 최초의 상태로 리셋이 되어야 합니다.
        */}
-      <Styled.GameControlButton onClick={isChoiceBtnSelected}>
-        대결!
+      <Styled.GameControlButton
+        status={ctrlButtonStr}
+        onClick={isChoiceBtnSelected}
+      >
+        {ctrlButtonStr}
       </Styled.GameControlButton>
 
       {/*
