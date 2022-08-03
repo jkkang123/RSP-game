@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import Colors from "./constants/Colors";
+import * as gameString from "./constants/string";
 
 export const Container = styled.main`
   display: flex;
@@ -35,7 +36,9 @@ export const GameControlButton = styled.button<{ status: string }>`
   border-radius: 6px;
 
   background-color: ${(props) =>
-    props.status !== "다시 시작하기" ? Colors.blue50 : Colors.red};
+    props.status !== gameString.ctrlButtonString.reset
+      ? Colors.blue50
+      : Colors.red};
 
   font-size: 18px;
   color: white;

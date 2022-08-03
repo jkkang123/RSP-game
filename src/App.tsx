@@ -1,6 +1,7 @@
 import * as Styled from "./App.style";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { BattleCounter, BattleResultInfo } from "./components";
+import * as gameString from "./constants/string";
 
 export interface ResultObjType {
   you: string;
@@ -26,71 +27,74 @@ function App() {
   }, []);
   const [hand, setHand] = useState<string>("");
   const [computerHand, setComputerHand] = useState<string>("");
-  const [countNum, setCountNum] = useState<string>("Ready");
+  const [roundState, setRoundState] = useState<string | undefined>(
+    gameString.roundString.ready
+  );
   const [isClickedBtn, setIsClickedBtn] = useState<boolean>(false);
   const [round, setRound] = useState<number>(0);
   const [battleResults, setBattleResults] = useState<ResultObjType[]>([]);
-  const [ctrlButtonStr, setCtrlButtonStr] = useState<string>("대결!");
+  const [ctrlButtonStr, setCtrlButtonStr] = useState<string>(
+    gameString.ctrlButtonString.match
+  );
 
   const compareHand = useCallback((myHand: string, comHand: string) => {
-    if (myHand === "가위") {
-      if (comHand === "가위") {
-        return "draw";
-      } else if (comHand === "바위") {
-        return "lose";
+    if (myHand === gameString.handString.scissors) {
+      if (comHand === gameString.handString.scissors) {
+        return gameString.roundString.draw;
+      } else if (comHand === gameString.handString.rock) {
+        return gameString.roundString.lose;
       } else {
-        return "win";
+        return gameString.roundString.win;
       }
-    } else if (myHand === "바위") {
-      if (comHand === "가위") {
-        return "win";
-      } else if (comHand === "바위") {
-        return "draw";
+    } else if (myHand === gameString.handString.rock) {
+      if (comHand === gameString.handString.scissors) {
+        return gameString.roundString.win;
+      } else if (comHand === gameString.handString.rock) {
+        return gameString.roundString.draw;
       } else {
-        return "lose";
+        return gameString.roundString.lose;
       }
-    } else if (myHand === "보") {
-      if (comHand === "가위") {
-        return "lose";
-      } else if (comHand === "바위") {
-        return "win";
+    } else if (myHand === gameString.handString.paper) {
+      if (comHand === gameString.handString.scissors) {
+        return gameString.roundString.lose;
+      } else if (comHand === gameString.handString.rock) {
+        return gameString.roundString.win;
       } else {
-        return "draw";
+        return gameString.roundString.draw;
       }
     }
   }, []);
 
   const alertGameResult = (my: number, computer: number) => {
     if (my && !computer) {
-      window.alert("당신이 승리하였습니다.");
+      window.alert(gameString.resultString.my);
     } else if (!my && computer) {
-      window.alert("컴퓨터가 승리하였습니다.");
+      window.alert(gameString.resultString.computer);
     }
   };
 
   const changeCtrlButton = useCallback((obj: ResultObjType) => {
     if (!obj.life.my || !obj.life.computer) {
-      alertGameResult(obj.life.my, obj.life.computer);
-      return "다시 시작하기";
+      return gameString.ctrlButtonString.reset;
     } else if (obj.life.my && obj.life.computer) {
-      return "재대결하기";
+      return gameString.ctrlButtonString.rematch;
     } else {
-      return "대결!";
+      return gameString.ctrlButtonString.match;
     }
   }, []);
 
   const onClickCtrlBtn = () => {
-    if (ctrlButtonStr !== "다시 시작하기") {
+    if (ctrlButtonStr !== gameString.ctrlButtonString.reset) {
       if (hand) {
-        setCountNum("3");
+        setRoundState("3");
       } else {
-        window.alert("가위/바위/보' 중 하나를 선택해주세요!");
+        window.alert(gameString.isSelectedCtrlBtnString);
       }
     } else {
       setHand("");
-      setCountNum("Ready");
+      setRoundState(gameString.roundString.ready);
       setComputerHand("");
-      setCtrlButtonStr("대결!");
+      setCtrlButtonStr(gameString.ctrlButtonString.match);
       setBattleResults([]);
       setRound(0);
       localStorage.removeItem("gameResult");
@@ -111,12 +115,23 @@ function App() {
 
   useEffect(() => {
     const countDown = setInterval(() => {
-      if (Number(countNum) > 0) {
-        setCountNum((count) => String(Number(count) - 1));
+      if (Number(roundState) > 0) {
+        setRoundState((count) => String(Number(count) - 1));
       }
-      if (Number(countNum) <= 0) {
-        const randomHand = ["가위", "바위", "보"][
-          Math.floor(Math.random() * ["가위", "바위", "보"].length)
+      if (Number(roundState) <= 0) {
+        const randomHand = [
+          gameString.handString.scissors,
+          gameString.handString.rock,
+          gameString.handString.paper,
+        ][
+          Math.floor(
+            Math.random() *
+              [
+                gameString.handString.scissors,
+                gameString.handString.rock,
+                gameString.handString.paper,
+              ].length
+          )
         ];
         clearInterval(countDown);
         setComputerHand(randomHand);
@@ -126,7 +141,7 @@ function App() {
     return () => {
       clearInterval(countDown);
     };
-  }, [countNum]);
+  }, [roundState]);
 
   useEffect(() => {
     if (computerHand && hand && isClickedBtn) {
@@ -141,11 +156,11 @@ function App() {
         result: resultString,
         life: {
           my:
-            resultString === "lose"
+            resultString === gameString.roundString.lose
               ? lastResult.life.my - 1
               : lastResult.life.my,
           computer:
-            resultString === "win"
+            resultString === gameString.roundString.win
               ? lastResult.life.computer - 1
               : lastResult.life.computer,
         },
@@ -159,6 +174,8 @@ function App() {
         localStorage.setItem("gameResult", JSON.stringify([resultObj]));
         setBattleResults([resultObj]);
       }
+      alertGameResult(resultObj.life.my, resultObj.life.computer);
+      setRoundState(resultObj.result);
       setCtrlButtonStr(changeCtrlButton(resultObj));
       setRound((num) => num + 1);
     }
@@ -212,7 +229,7 @@ function App() {
          * 3초가 지나면 이번 라운드의 승패가 나옵니다. Win / Lose / Draw
          * 사용자가 재경기 버튼을 클릭하면 'READY'로 변경되어야 합니다.
          */}
-        <Styled.CountDownNumber>{countNum}</Styled.CountDownNumber>
+        <Styled.CountDownNumber>{roundState}</Styled.CountDownNumber>
         <BattleCounter
           activeLife={
             battleResults.length

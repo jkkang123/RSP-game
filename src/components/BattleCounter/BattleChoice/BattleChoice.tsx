@@ -1,5 +1,6 @@
 import * as Styled from "./BattleChoice.style";
 import { Dispatch, SetStateAction } from "react";
+import * as gameString from "../../../constants/string";
 
 interface BattleChoiceProps {
   onChangeButton: Dispatch<SetStateAction<string>>;
@@ -14,13 +15,15 @@ const BattleChoice = (props: BattleChoiceProps) => {
           name="battle-choice"
           id="battle-choice-scissors"
           type="radio"
-          checked={props.hand === "가위"}
-          value="가위"
+          checked={props.hand === gameString.handString.scissors}
+          value={gameString.handString.scissors}
           onChange={(e) => {
             props.onChangeButton(e.target.value);
           }}
         />
-        <label htmlFor="battle-choice-scissors">가위</label>
+        <label htmlFor="battle-choice-scissors">
+          {gameString.handString.scissors}
+        </label>
       </Styled.RadioWrapper>
 
       <Styled.RadioWrapper>
@@ -28,13 +31,13 @@ const BattleChoice = (props: BattleChoiceProps) => {
           name="battle-choice"
           id="battle-choice-rock"
           type="radio"
-          checked={props.hand === "바위"}
-          value="바위"
+          checked={props.hand === gameString.handString.rock}
+          value={gameString.handString.rock}
           onChange={(e) => {
             props.onChangeButton(e.target.value);
           }}
         />
-        <label htmlFor="battle-choice-rock">바위</label>
+        <label htmlFor="battle-choice-rock">{gameString.handString.rock}</label>
       </Styled.RadioWrapper>
 
       <Styled.RadioWrapper>
@@ -42,13 +45,15 @@ const BattleChoice = (props: BattleChoiceProps) => {
           name="battle-choice"
           id="battle-choice-paper"
           type="radio"
-          checked={props.hand === "보"}
-          value="보"
+          checked={props.hand === gameString.handString.paper}
+          value={gameString.handString.paper}
           onChange={(e) => {
             props.onChangeButton(e.target.value);
           }}
         />
-        <label htmlFor="battle-choice-paper">보</label>
+        <label htmlFor="battle-choice-paper">
+          {gameString.handString.paper}
+        </label>
       </Styled.RadioWrapper>
     </Styled.Container>
   );

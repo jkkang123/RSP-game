@@ -1,8 +1,9 @@
 import { HandPaper, HandRock, HandScissors, Question } from "@images/index";
-import { useState, Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction } from "react";
 import BattleChoice from "./BattleChoice";
 import * as Styled from "./BattleCounter.style";
 import Hearts from "./Hearts";
+import * as gameString from "../../constants/string";
 
 type BattleCounterProps = {
   activeLife: number;
@@ -18,11 +19,11 @@ const BattleCounter = ({
   changHand,
 }: BattleCounterProps) => {
   const setBattleChoiceImg = () => {
-    if (hand === "가위") {
+    if (hand === gameString.handString.scissors) {
       return HandScissors;
-    } else if (hand === "바위") {
+    } else if (hand === gameString.handString.rock) {
       return HandRock;
-    } else if (hand === "보") {
+    } else if (hand === gameString.handString.paper) {
       return HandPaper;
     }
     return Question;
