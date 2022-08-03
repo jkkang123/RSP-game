@@ -1,10 +1,5 @@
 import * as Styled from "./BattleResultInfo.style";
-
-type ResultObjType = {
-  you: string;
-  computer: string;
-  result: string | undefined;
-};
+import { ResultObjType } from "../../App";
 
 type BattleResultInfoProps = {
   data: ResultObjType;

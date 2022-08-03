@@ -13,6 +13,7 @@ function App() {
   const [computerHand, setComputerHand] = useState<string>("");
   const [countNum, setCountNum] = useState<string>("Ready");
   const [isClickedBtn, setIsClickedBtn] = useState<boolean>(false);
+  const [round, setRound] = useState<number>(0);
   const [battleResults, setBattleResults] = useState<ResultObjType[]>([]);
 
   const compareHand = useCallback((myHand: string, comHand: string) => {
@@ -47,6 +48,7 @@ function App() {
     const gameResult = localStorage.getItem("gameResult");
     if (gameResult) {
       setBattleResults(JSON.parse(gameResult));
+      setRound(JSON.parse(gameResult).length);
     }
   }, []);
 
@@ -86,6 +88,7 @@ function App() {
         localStorage.setItem("gameResult", JSON.stringify([resultObj]));
         setBattleResults([resultObj]);
       }
+      setRound((num) => num + 1);
     }
     return () => setIsClickedBtn(false);
   }, [compareHand, computerHand, hand, isClickedBtn]);
@@ -98,7 +101,7 @@ function App() {
        * ROUND는 localStorage로 관리되어야 하고
        * 게임의 결과가 나올 때마다 1씩 증가한다.
        */}
-      <Styled.BattleRoundTitle>ROUND: 3</Styled.BattleRoundTitle>
+      <Styled.BattleRoundTitle>{`ROUND: ${round}`}</Styled.BattleRoundTitle>
       <Styled.BattleGround>
         {/*
          * TODO: 라운드 종료 / 경기 종료 - 생명수 차감
