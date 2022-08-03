@@ -6,15 +6,30 @@ export interface ResultObjType {
   you: string;
   computer: string;
   result: string | undefined;
+  life: {
+    my: number;
+    computer: number;
+  };
 }
 
 function App() {
   const [hand, setHand] = useState<string>("");
   const [computerHand, setComputerHand] = useState<string>("");
+
   const [countNum, setCountNum] = useState<string>("Ready");
   const [isClickedBtn, setIsClickedBtn] = useState<boolean>(false);
   const [round, setRound] = useState<number>(0);
-  const [battleResults, setBattleResults] = useState<ResultObjType[]>([]);
+  const [battleResults, setBattleResults] = useState<ResultObjType[]>([
+    {
+      you: "",
+      computer: "",
+      result: "",
+      life: {
+        my: 3,
+        computer: 3,
+      },
+    },
+  ]);
 
   const compareHand = useCallback((myHand: string, comHand: string) => {
     if (myHand === "가위") {
@@ -53,10 +68,11 @@ function App() {
   };
 
   useEffect(() => {
-    const gameResult = localStorage.getItem("gameResult");
-    if (gameResult) {
-      setBattleResults(JSON.parse(gameResult));
-      setRound(JSON.parse(gameResult).length);
+    const tempResult = localStorage.getItem("gameResult");
+    if (tempResult) {
+      const storageResult: ResultObjType[] = JSON.parse(tempResult);
+      setBattleResults(storageResult);
+      setRound(storageResult.length);
     }
   }, []);
 
@@ -81,14 +97,24 @@ function App() {
 
   useEffect(() => {
     if (computerHand && hand && isClickedBtn) {
-      const tempResult = localStorage.getItem("gameResult");
+      const storageResult = localStorage.getItem("gameResult");
+      const resultString: string | undefined = compareHand(hand, computerHand);
+      const beforeLife = battleResults[battleResults.length - 1].life;
       const resultObj: ResultObjType = {
+        ...battleResults[battleResults.length - 1],
         you: hand,
         computer: computerHand,
-        result: compareHand(hand, computerHand),
+        result: resultString,
+        life: {
+          my: resultString === "lose" ? beforeLife.my - 1 : beforeLife.my,
+          computer:
+            resultString === "win"
+              ? beforeLife.computer - 1
+              : beforeLife.computer,
+        },
       };
-      if (tempResult && typeof tempResult === "string") {
-        const gameResultArr = JSON.parse(tempResult);
+      if (storageResult && typeof storageResult === "string") {
+        const gameResultArr: ResultObjType[] = JSON.parse(storageResult);
         gameResultArr.push(resultObj);
         localStorage.setItem("gameResult", JSON.stringify(gameResultArr));
         setBattleResults(gameResultArr);
@@ -99,7 +125,7 @@ function App() {
       setRound((num) => num + 1);
     }
     return () => setIsClickedBtn(false);
-  }, [compareHand, computerHand, hand, isClickedBtn]);
+  }, [compareHand, battleResults, computerHand, hand, isClickedBtn]);
 
   return (
     <Styled.Container>
@@ -123,7 +149,11 @@ function App() {
          * 경기가 종료되면 window.alert 메소드를 활용하여
          * "<컴퓨터가 / 당신이> 승리하였습니다." 를 띄워야합니다.
          */}
-        <BattleCounter activeLife={2} hand={hand} changHand={setHand} />
+        <BattleCounter
+          activeLife={battleResults[battleResults.length - 1].life.my}
+          hand={hand}
+          changHand={setHand}
+        />
         {/*
          * TODO: 라운드 종료 / 경기 종료 - 게임 시작 버튼
          *
@@ -134,7 +164,7 @@ function App() {
          */}
         <Styled.CountDownNumber>{countNum}</Styled.CountDownNumber>
         <BattleCounter
-          activeLife={1}
+          activeLife={battleResults[battleResults.length - 1].life.computer}
           isComputer
           hand={computerHand}
           changHand={setComputerHand}
