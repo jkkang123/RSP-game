@@ -8,7 +8,7 @@ export interface ResultObjType {
   computer: string;
   result: string | undefined;
   life: {
-    my: number;
+    you: number;
     computer: number;
   };
 }
@@ -20,7 +20,7 @@ function App() {
       computer: "",
       result: "",
       life: {
-        my: 3,
+        you: 3,
         computer: 3,
       },
     };
@@ -37,8 +37,8 @@ function App() {
     gameString.ctrlButtonString.match
   );
 
-  const compareHand = useCallback((myHand: string, comHand: string) => {
-    if (myHand === gameString.handString.scissors) {
+  const compareHand = useCallback((youHand: string, comHand: string) => {
+    if (youHand === gameString.handString.scissors) {
       if (comHand === gameString.handString.scissors) {
         return gameString.roundString.draw;
       } else if (comHand === gameString.handString.rock) {
@@ -46,7 +46,7 @@ function App() {
       } else {
         return gameString.roundString.win;
       }
-    } else if (myHand === gameString.handString.rock) {
+    } else if (youHand === gameString.handString.rock) {
       if (comHand === gameString.handString.scissors) {
         return gameString.roundString.win;
       } else if (comHand === gameString.handString.rock) {
@@ -54,7 +54,7 @@ function App() {
       } else {
         return gameString.roundString.lose;
       }
-    } else if (myHand === gameString.handString.paper) {
+    } else if (youHand === gameString.handString.paper) {
       if (comHand === gameString.handString.scissors) {
         return gameString.roundString.lose;
       } else if (comHand === gameString.handString.rock) {
@@ -65,18 +65,18 @@ function App() {
     }
   }, []);
 
-  const alertGameResult = (my: number, computer: number) => {
-    if (my && !computer) {
-      window.alert(gameString.resultString.my);
-    } else if (!my && computer) {
+  const alertGameResult = (you: number, computer: number) => {
+    if (you && !computer) {
+      window.alert(gameString.resultString.you);
+    } else if (!you && computer) {
       window.alert(gameString.resultString.computer);
     }
   };
 
   const changeCtrlButton = useCallback((obj: ResultObjType) => {
-    if (!obj.life.my || !obj.life.computer) {
+    if (!obj.life.you || !obj.life.computer) {
       return gameString.ctrlButtonString.reset;
-    } else if (obj.life.my && obj.life.computer) {
+    } else if (obj.life.you && obj.life.computer) {
       return gameString.ctrlButtonString.rematch;
     } else {
       return gameString.ctrlButtonString.match;
@@ -155,10 +155,10 @@ function App() {
         computer: computerHand,
         result: resultString,
         life: {
-          my:
+          you:
             resultString === gameString.roundString.lose
-              ? lastResult.life.my - 1
-              : lastResult.life.my,
+              ? lastResult.life.you - 1
+              : lastResult.life.you,
           computer:
             resultString === gameString.roundString.win
               ? lastResult.life.computer - 1
@@ -174,7 +174,7 @@ function App() {
         localStorage.setItem("gameResult", JSON.stringify([resultObj]));
         setBattleResults([resultObj]);
       }
-      alertGameResult(resultObj.life.my, resultObj.life.computer);
+      alertGameResult(resultObj.life.you, resultObj.life.computer);
       setRoundState(resultObj.result);
       setCtrlButtonStr(changeCtrlButton(resultObj));
       setRound((num) => num + 1);
@@ -215,8 +215,8 @@ function App() {
         <BattleCounter
           activeLife={
             battleResults.length
-              ? battleResults[battleResults.length - 1].life.my
-              : defaultResult.life.my
+              ? battleResults[battleResults.length - 1].life.you
+              : defaultResult.life.you
           }
           hand={hand}
           changHand={setHand}

@@ -12,7 +12,7 @@ export const roundString = {
 };
 
 export const resultString = {
-  my: "당신이 승리하였습니다.",
+  you: "당신이 승리하였습니다.",
   computer: "컴퓨터가 승리하였습니다.",
 };
 
