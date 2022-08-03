@@ -1,5 +1,5 @@
 import * as Styled from "./App.style";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { BattleCounter, BattleResultInfo } from "./components";
 
 export interface ResultObjType {
@@ -13,14 +13,8 @@ export interface ResultObjType {
 }
 
 function App() {
-  const [hand, setHand] = useState<string>("");
-  const [computerHand, setComputerHand] = useState<string>("");
-
-  const [countNum, setCountNum] = useState<string>("Ready");
-  const [isClickedBtn, setIsClickedBtn] = useState<boolean>(false);
-  const [round, setRound] = useState<number>(0);
-  const [battleResults, setBattleResults] = useState<ResultObjType[]>([
-    {
+  const defaultResult: ResultObjType = useMemo(() => {
+    return {
       you: "",
       computer: "",
       result: "",
@@ -28,8 +22,14 @@ function App() {
         my: 3,
         computer: 3,
       },
-    },
-  ]);
+    };
+  }, []);
+  const [hand, setHand] = useState<string>("");
+  const [computerHand, setComputerHand] = useState<string>("");
+  const [countNum, setCountNum] = useState<string>("Ready");
+  const [isClickedBtn, setIsClickedBtn] = useState<boolean>(false);
+  const [round, setRound] = useState<number>(0);
+  const [battleResults, setBattleResults] = useState<ResultObjType[]>([]);
   const [ctrlButtonStr, setCtrlButtonStr] = useState<string>("대결!");
 
   const compareHand = useCallback((myHand: string, comHand: string) => {
@@ -79,11 +79,21 @@ function App() {
     }
   }, []);
 
-  const isChoiceBtnSelected = () => {
-    if (hand) {
-      setCountNum("3");
+  const onClickCtrlBtn = () => {
+    if (ctrlButtonStr !== "다시 시작하기") {
+      if (hand) {
+        setCountNum("3");
+      } else {
+        window.alert("가위/바위/보' 중 하나를 선택해주세요!");
+      }
     } else {
-      window.alert("가위/바위/보' 중 하나를 선택해주세요!");
+      setHand("");
+      setCountNum("Ready");
+      setComputerHand("");
+      setCtrlButtonStr("대결!");
+      setBattleResults([]);
+      setRound(0);
+      localStorage.removeItem("gameResult");
     }
   };
 
@@ -121,7 +131,8 @@ function App() {
   useEffect(() => {
     if (computerHand && hand && isClickedBtn) {
       const storageResult = localStorage.getItem("gameResult");
-      const lastResult: ResultObjType = battleResults[battleResults.length - 1];
+      const lastResult: ResultObjType =
+        battleResults[battleResults.length - 1] ?? defaultResult;
       const resultString: string | undefined = compareHand(hand, computerHand);
       const resultObj: ResultObjType = {
         ...lastResult,
@@ -155,10 +166,11 @@ function App() {
   }, [
     compareHand,
     changeCtrlButton,
-    battleResults,
     computerHand,
     hand,
     isClickedBtn,
+    battleResults,
+    defaultResult,
   ]);
 
   return (
@@ -184,7 +196,11 @@ function App() {
          * "<컴퓨터가 / 당신이> 승리하였습니다." 를 띄워야합니다.
          */}
         <BattleCounter
-          activeLife={battleResults[battleResults.length - 1].life.my}
+          activeLife={
+            battleResults.length
+              ? battleResults[battleResults.length - 1].life.my
+              : defaultResult.life.my
+          }
           hand={hand}
           changHand={setHand}
         />
@@ -198,7 +214,11 @@ function App() {
          */}
         <Styled.CountDownNumber>{countNum}</Styled.CountDownNumber>
         <BattleCounter
-          activeLife={battleResults[battleResults.length - 1].life.computer}
+          activeLife={
+            battleResults.length
+              ? battleResults[battleResults.length - 1].life.computer
+              : defaultResult.life.computer
+          }
           isComputer
           hand={computerHand}
           changHand={setComputerHand}
@@ -223,10 +243,7 @@ function App() {
        * '다시 시작하기' 버튼을 클릭할 경우,
        * 최초의 상태로 리셋이 되어야 합니다.
        */}
-      <Styled.GameControlButton
-        status={ctrlButtonStr}
-        onClick={isChoiceBtnSelected}
-      >
+      <Styled.GameControlButton status={ctrlButtonStr} onClick={onClickCtrlBtn}>
         {ctrlButtonStr}
       </Styled.GameControlButton>
 

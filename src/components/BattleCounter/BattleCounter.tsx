@@ -56,7 +56,11 @@ const BattleCounter = ({
        * 가위 / 바위 / 보 중 하나가 결과로 보여져야 합니다.
        * 재대결 버튼을 클릭하게 되면 다시 `생각중...` 으로 보여져야 합니다.
        */}
-      {isComputer ? "생각중..." : <BattleChoice onChangeButton={changHand} />}
+      {isComputer ? (
+        "생각중..."
+      ) : (
+        <BattleChoice hand={hand} onChangeButton={changHand} />
+      )}
     </Styled.Container>
   );
 };
