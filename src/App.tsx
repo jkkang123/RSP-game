@@ -44,6 +44,14 @@ function App() {
     }
   }, []);
 
+  const isChoiceBtnSelected = () => {
+    if (hand) {
+      setCountNum("3");
+    } else {
+      window.alert("가위/바위/보' 중 하나를 선택해주세요!");
+    }
+  };
+
   useEffect(() => {
     const gameResult = localStorage.getItem("gameResult");
     if (gameResult) {
@@ -151,7 +159,7 @@ function App() {
        * '다시 시작하기' 버튼을 클릭할 경우,
        * 최초의 상태로 리셋이 되어야 합니다.
        */}
-      <Styled.GameControlButton onClick={() => setCountNum("3")}>
+      <Styled.GameControlButton onClick={isChoiceBtnSelected}>
         대결!
       </Styled.GameControlButton>
 
